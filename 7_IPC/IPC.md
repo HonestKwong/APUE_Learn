@@ -363,5 +363,7 @@ epoll事件边缘触发?
 
 
 
+反复发送：
 
+while true; do(./client 127.0.0.1 &); sleep 1; done
 

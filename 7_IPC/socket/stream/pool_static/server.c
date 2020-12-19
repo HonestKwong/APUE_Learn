@@ -8,10 +8,10 @@
 #include <time.h>
 #include "proto.h"
 #include <wait.h>
-#include <unistd.h>
+#include <unistd.h>  
 #define IPSTRSIZE 40
 #define BUFSIZE 1024
-#define PROCNUM 4
+#define PROCNUM 4   //四个线程限制太死
 static void server_loop(int sd);
 
 static void server_job(int sd){
