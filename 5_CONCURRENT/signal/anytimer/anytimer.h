@@ -3,10 +3,18 @@
 
 typedef void at_jobfunc_t(void*);
 
-static pos;
-static struct XXX *job;
+static int pos;
+// static struct XXX *job;
 
-int at_addjob(int sec, at_jobfunc_t*jobp, void* arg);
+int at_addjob(int sec, at_jobfunc_t* jobp, void* arg);
+/*
+* return >=0 成功，返回指定任务ID
+*        == -EINVAL 失败，参数非法
+*        == -ENOSPC 失败，数组满
+         == -ENOMEM 失败，内存空间不足
+**/
+
+int at_addjob_repeat(int , at_jobfunc_t*, void*);
 /*
 * return >=0 成功，返回指定任务ID
 *        == -EINVAL 失败，参数非法
@@ -26,6 +34,7 @@ int at_waitjob(int id);
 /*
 * return ==0 成功，指定任务已成功释放
 *        == -EINVAL 失败，参数非法
+*        == -EBUSY 失败，指定任务为周期任务
 **/
 
 at_pausejob();  //暂停
