@@ -19,7 +19,5 @@
 !.**/*.vcproj
 !.**/*.sln
 !.**/*.md
-!.**/makefile
-!.**/Makefile
-
-
+!makefile
+!Makefile
