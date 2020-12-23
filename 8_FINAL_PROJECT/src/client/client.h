@@ -1,7 +1,7 @@
 #ifndef CLIENT_H__
 #define CLIENT_H__
 
-#define DEFAULT_PLAYERCMD "/usr/bin/mpg123 > /dev/null" //不希望输出信息就重定向
+#define DEFAULT_PLAYERCMD "/usr/bin/mpg123 - > /dev/null" //不希望输出信息就重定向,加-号标识播放标准输入上来的内容上!
 
 #include "../include/proto.h"
 struct client_conf_st

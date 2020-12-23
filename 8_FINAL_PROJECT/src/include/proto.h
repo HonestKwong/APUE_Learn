@@ -22,26 +22,24 @@
 struct msg_channel_st  
 {
     chnid_t chnid;      //must between [MINCHNID, MAXCHNID]
+    
     uint8_t data[1];
-}__attribute__(packed); //结构体不能考虑对其！
+}__attribute__((packed)); //结构体不能考虑对其！
 
 
 struct msg_listentry_st{
     chnid_t chnid;
+    uint16_t len;
     uint8_t desc[1];
 
-}__attribute__(packed);
+}__attribute__((packed));
 
 struct msg_list_st
 {
     /* data */
     chnid_t chnid;    //must be LISTCHNID
-    struct msg_listentry_st[1];
-}__attribute__(packed);
-
-
-
-
+    struct msg_listentry_st entry[1];
+}__attribute__((packed));
 
 
 
