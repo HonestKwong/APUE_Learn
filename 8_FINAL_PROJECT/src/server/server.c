@@ -6,6 +6,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <syslog.h>
+#include <string.h>
+#include <errno.h>
+#include <signal.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <net/if.h>
+#include "medialib.h"
+// #include <sys/types.h>
 
 
 /*
@@ -28,12 +38,13 @@ static void printfhelp(void){
 
 }
 
-static daemonize(void){
+static int daemonize(void){
     pid_t pid;
     int fd;
     pid = fork(); //父进程中的信号掩码是不被继承的
     if(pid<0){
-        perror("fork()");
+        // perror("fork()");
+        syslog(LOG_ERR,"fork(): %s", strerror(errno)); //不用补/n，syslogd是显示\n
         return -1;
     }
     if(pid>0)     //parent 退出父进程
@@ -41,16 +52,19 @@ static daemonize(void){
     
     fd = open("/dev/null", O_RDWR);
     if(fd<0){
-        perror("open()");
+        // perror("open()");
+        syslog(LOG_WARNING,"open(): %s", strerror(errno)); //不用补/n，syslogd是显示\n
         return -2;
     } 
+    else{
+        dup2(fd,0);
+        dup2(fd,1);
+        dup2(fd,2);
 
-    dup2(fd,0);
-    dup2(fd,1);
-    dup2(fd,2);
+        if(fd > 2)
+            close(fd);
+    }
 
-    if(fd > 2)
-        close(fd);
 
     setsid();
 
@@ -60,10 +74,32 @@ static daemonize(void){
 
     return 0;
 
+}
+
+static int socket_init(void){
+    int serversd;
+    struct ip_mreqn mreq;
+    serversd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(serversd < 0){
+        syslog(LOG_ERR,"socket(): %s", strerror(errno));
+        exit(1);
+    }
+
+    inet_pton(AF_INET, server_conf.mgroup, &mreq.imr_multiaddr);
+    inet_pton(AF_INET,"0.0.0.0", &mreq.imr_address);
+    mreq.imr_ifindex = if_nametoindex(server_conf.ifname);
+    if(setsockopt(serversd, IPPROTO_IP, IP_MULTICAST_IF, &mreq, sizeof(mreq))<0){
+        syslog(LOG_ERR, "setsockopt(IP_MULTICAST_IF):%s", strerror(errno));
+        exit(1);
+    }
+
+    //bind();
+}
 
 
-
-
+static void daemon_exit(int s){
+    closelog();
+    exit(0);
 
 }
 
@@ -79,6 +115,20 @@ struct  server_conf_st server_conf =
 
 int main(int argc, char** argv){
     int c;
+    int i;
+    //signal(); //可能产生重入现象
+    struct sigaction sa;
+    sa.sa_handler = daemon_exit;
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask, SIGINT);
+    sigaddset(&sa.sa_mask,SIGQUIT);
+    sigaddset(&sa.sa_mask,SIGTERM);
+
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGQUIT, &sa, NULL);
+
+    openlog("netradio", LOG_PID|LOG_PERROR, LOG_DAEMON);
     /*命令行分析*/
     while(1){
         c = getopt(argc, argv, "M:P:FD:I:H");
@@ -121,24 +171,42 @@ int main(int argc, char** argv){
         /*do nothing*/
     }
     else{
-        fprintf(stderr, "EINVAL\n");  
+        // fprintf(stderr, "EINVAL\n");  
+        syslog(LOG_ERR,"EIVAL server_conf.runmode."); //不用补/n，syslogd是显示\n
         exit(1);
     }
 
     
     /*SOCKET初始化*/
-
+    socket_init();
 
     /*获取频道信息*/
+    struct mlib_listentry_st* list;
+    int list_size;
+    mlib_getchnlist(&list, &list_size)
+    if(){
+
+    }
 
 
     /*创建节目单线程*/
 
 
+    thr_list_create(list, list_size);
+    /*if error*/
 
-    /*创建频道线程*/
+
+    /*创建频道线程*/ //害怕延迟抖动
+
+    for(i = 0; i < list_size; i++){
+        thr_channel_create(list+i);
+        /* if error*/
+    }
+
+    syslog(LOG_DEBUG, "%d channel threads created.", i);
 
     while(1) pause();
+    // closelog();   //本应该是在这里关闭日志，用信号关闭日志
 
 
 
