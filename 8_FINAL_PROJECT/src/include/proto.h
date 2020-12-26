@@ -14,7 +14,7 @@
 
 // #define MSG_CHANNEL_MAX   (512 - 20) //包的最大长度
 #define MSG_CHANNEL_MAX   (65536 - 20 - 8) //包的最大长度 ip头和udp头？
-#define MAX_DATA          (MSG_CHNNEL_MAX-sizeof(chnid_t))  //
+#define MAX_DATA          (MSG_CHANNEL_MAX-sizeof(chnid_t))  //
 
 #define MSG_LIST_MAX (65536-20-8)
 #define MAX_ENTRY (MSG_LIST_MAX - sizeof(chnid_t))

@@ -11,7 +11,4 @@ int thr_channel_destroyall(void);
 
 
 
-
-
-
 #endif

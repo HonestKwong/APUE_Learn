@@ -17,6 +17,8 @@ struct  server_conf_st
     char* ifname;
 };
 extern struct server_conf_st server_conf;
+extern int serversd;
+extern struct sockaddr_in sndaddr;
 
 
 

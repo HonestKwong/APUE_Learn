@@ -27,6 +27,8 @@
  * -I   指定网络设备
  * */
 
+
+
 static void printfhelp(void){
     printf("-M   指定多播组\n");
     printf("-P   指定接收端口\n");
@@ -37,6 +39,10 @@ static void printfhelp(void){
     
 
 }
+
+int serversd;
+struct sockaddr_in sndaddr;
+
 
 static int daemonize(void){
     pid_t pid;
@@ -77,7 +83,7 @@ static int daemonize(void){
 }
 
 static int socket_init(void){
-    int serversd;
+    
     struct ip_mreqn mreq;
     serversd = socket(AF_INET, SOCK_DGRAM, 0);
     if(serversd < 0){
@@ -94,6 +100,10 @@ static int socket_init(void){
     }
 
     //bind();
+    sndaddr.sin_family = AF_INET;
+    sndaddr.sin_port = htons(atoi(server_conf.rcvport));
+    inet_pton(AF_INET, server_conf.mgroup ,sndaddr.sin_addr.s_addr);
+    return 0;
 }
 
 
@@ -183,24 +193,33 @@ int main(int argc, char** argv){
     /*获取频道信息*/
     struct mlib_listentry_st* list;
     int list_size;
-    mlib_getchnlist(&list, &list_size)
-    if(){
-
+    int err;
+    err = mlib_getchnlist(&list, &list_size);
+    if(err){
+        syslog(LOG_ERR,"mlib_getchnlist():%s.", strerror(err));
+        exit(1);
     }
 
 
     /*创建节目单线程*/
 
 
-    thr_list_create(list, list_size);
+    err = thr_list_create(list, list_size);
+    if(err)
+        exit(1);
     /*if error*/
 
 
     /*创建频道线程*/ //害怕延迟抖动
 
     for(i = 0; i < list_size; i++){
-        thr_channel_create(list+i);
+        err = thr_channel_create(list+i);
+        
         /* if error*/
+        if(err){
+            fprintf(stderr, "thr_channel_create():%s\n",strerror(err));
+            exit(1);
+        }
     }
 
     syslog(LOG_DEBUG, "%d channel threads created.", i);
