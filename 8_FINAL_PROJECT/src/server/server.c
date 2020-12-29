@@ -15,6 +15,7 @@
 #include <netinet/ip.h>
 #include <net/if.h>
 #include "medialib.h"
+#include "thr_list.h"
 // #include <sys/types.h>
 
 
@@ -42,6 +43,7 @@ static void printfhelp(void){
 
 int serversd;
 struct sockaddr_in sndaddr;
+static struct mlib_listentry_st* list;
 
 
 static int daemonize(void){
@@ -108,6 +110,9 @@ static int socket_init(void){
 
 
 static void daemon_exit(int s){
+    thr_list_destroy();   ///这个函数没有实现
+    thr_channel_destroyall();
+    mlib_freechnlist(list);
     closelog();
     exit(0);
 
@@ -191,7 +196,7 @@ int main(int argc, char** argv){
     socket_init();
 
     /*获取频道信息*/
-    struct mlib_listentry_st* list;
+    
     int list_size;
     int err;
     err = mlib_getchnlist(&list, &list_size);

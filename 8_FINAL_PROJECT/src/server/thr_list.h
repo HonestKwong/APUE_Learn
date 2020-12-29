@@ -5,10 +5,8 @@
 
 int thr_list_create(struct mlib_listentry_st*, int);
 
-int thr_list_destroy();
+int thr_list_destroy(void);
 
-
-int thr_list_destroy();
 
 
 

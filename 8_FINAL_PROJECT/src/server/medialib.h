@@ -1,6 +1,8 @@
 #ifndef MEDIALIB_H__
 #define MEDIALIB_H__
 
+#define MP3_BITRATE 128
+
 struct mlib_listentry_st
 {
     chnid_t chnid;
@@ -8,7 +10,7 @@ struct mlib_listentry_st
 };
 
 int mlib_getchnlist(struct mlib_listentry_st** , int*);
-int m_lib_freechnlist(struct mlib_listentry_st*);
+int mlib_freechnlist(struct mlib_listentry_st*);
 ssize_t mlib_readchn(chnid_t, void* , size_t);
 
 #endif
