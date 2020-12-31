@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// #include <proto.h>
 #include <proto.h>
 #include "client.h"
 
@@ -180,6 +181,7 @@ struct option argarr[]= {{"port", 1, NULL, 'P'}, \
         perror("malloc()");
         exit(1);
     }
+    serveraddr_len = sizeof(serveraddr);
     while(1){
         len = recvfrom(sd, msg_list, MSG_LIST_MAX, 0, (void*)&serveraddr,&serveraddr_len);
 
@@ -194,6 +196,7 @@ struct option argarr[]= {{"port", 1, NULL, 'P'}, \
         break;
     }
 
+    // 打印节目单并选择频道
     struct msg_listentry_st *pos;
 
     for(pos = msg_list->entry; (char*)pos < ((char*)msg_list+len) ; pos = (void*)((char*)pos + ntohs(pos->len))){ //char* 一次向后移动一个字节
@@ -201,11 +204,15 @@ struct option argarr[]= {{"port", 1, NULL, 'P'}, \
     }
 
     free(msg_list); //打印完可以free掉
-
+    puts("Please input:");
     while(1){
         ret = scanf("%d" ,&chosenid);
         if(ret != 1) exit(1);
+        else break;
     }
+
+    fprintf(stdout,"chosenid = %d\n", ret);
+
     struct msg_channel_st *msg_channel;
     msg_channel = malloc(MSG_CHANNEL_MAX);
     if(msg_channel == NULL){
@@ -213,8 +220,10 @@ struct option argarr[]= {{"port", 1, NULL, 'P'}, \
         exit(1);
     }
 
+    raddr_len = sizeof(raddr);
     while(1){
         len = recvfrom(sd, msg_channel, MSG_CHANNEL_MAX, 0, (void*)&raddr, &raddr_len);
+        printf("len:%d\n", len);
         if(raddr.sin_addr.s_addr != serveraddr.sin_addr.s_addr\
             ||raddr.sin_port != serveraddr.sin_port)    //man 7 ip
         {
@@ -230,11 +239,12 @@ struct option argarr[]= {{"port", 1, NULL, 'P'}, \
             if(writen(pd[1], msg_channel->data, len-sizeof(chnid_t))<0)  //writen: 保证写完
                 exit(1);
         }
-        free(msg_channel);
-        close(sd);
-        exit(0);
+
 
     }
+    free(msg_channel);
+    close(sd);
+    exit(0);
     
     
 
@@ -254,5 +264,5 @@ struct option argarr[]= {{"port", 1, NULL, 'P'}, \
     //父进程：从网络上收包，发送给子进程
 
 
-    exit(0);
+    // exit(0);
 }

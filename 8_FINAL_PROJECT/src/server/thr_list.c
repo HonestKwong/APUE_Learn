@@ -54,10 +54,31 @@ static void* thr_list(void* p){
             syslog(LOG_WARNING, "sendto(serversd, entlistp...:%s)", strerror(errno));
         }
         else{
-            syslog(LOG_DEBUG, "sendto(serversd, entlistp...):%s)", strerror(errno));
+            syslog(LOG_DEBUG, "sendto(serversd, entlistp...):):successed");
         }
 
         sleep(1);
     }
 }
 
+int thr_list_create(struct mlib_listentry_st* listp, int nr_ent){
+    int err;
+    list_ent = listp;
+    nr_list_ent = nr_ent;
+    err = pthread_create(&tid_list, NULL, thr_list, NULL);
+    if(err){
+        syslog(LOG_ERR, "pthread_create():%s.", strerror(err));
+        return -1;
+    }
+    return 0;
+}
+
+
+int thr_list_destroy(void){
+    int err;
+    err = pthread_cancel(tid_list);
+    pthread_join(tid_list, NULL);
+    return err;
+
+    
+}

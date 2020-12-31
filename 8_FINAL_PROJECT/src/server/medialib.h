@@ -1,7 +1,7 @@
 #ifndef MEDIALIB_H__
 #define MEDIALIB_H__
 
-#define MP3_BITRATE 128
+#define MP3_BITRATE 128*1024
 
 struct mlib_listentry_st
 {

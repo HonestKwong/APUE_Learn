@@ -16,6 +16,8 @@
 #include <net/if.h>
 #include "medialib.h"
 #include "thr_list.h"
+#include <arpa/inet.h>
+
 // #include <sys/types.h>
 
 
@@ -104,7 +106,7 @@ static int socket_init(void){
     //bind();
     sndaddr.sin_family = AF_INET;
     sndaddr.sin_port = htons(atoi(server_conf.rcvport));
-    inet_pton(AF_INET, server_conf.mgroup ,sndaddr.sin_addr.s_addr);
+    inet_pton(AF_INET, server_conf.mgroup , &sndaddr.sin_addr.s_addr);
     return 0;
 }
 
@@ -113,7 +115,9 @@ static void daemon_exit(int s){
     thr_list_destroy();   ///这个函数没有实现
     thr_channel_destroyall();
     mlib_freechnlist(list);
+    syslog(LOG_WARNING,"signal-%d caught,exit now",s);
     closelog();
+    
     exit(0);
 
 }

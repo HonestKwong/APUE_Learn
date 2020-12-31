@@ -120,12 +120,13 @@ int mlib_getchnlist(struct mlib_listentry_st** result, int* resnum){
         // globres.gl_pathv[i] -> "home/kwong/music/ch1"
         res = path2entry(globres.gl_pathv[i]);
         if(res!= NULL){
-            syslog(LOG_DEBUG, "path2entry() returned[%d %s]", res->chnid,res->desc);
+            syslog(LOG_DEBUG, "path2entry() returned[%d] %s", res->chnid,res->desc);
             memcpy(channel+res->chnid, res, sizeof(*res));
             ptr[num].chnid = res->chnid;
             ptr[num].desc = strdup(res->desc);
+            num++;
         }
-        num++;
+        
     }
     *result = realloc(ptr, sizeof(struct mlib_listentry_st)* num);
     if(*result == NULL){
@@ -159,6 +160,7 @@ static int open_next(chnid_t chnid){
         }
     }
     syslog(LOG_ERR, "None of mp3 in channel %d is avaliable.", chnid);
+    return -1;
 }
 
 ssize_t mlib_readchn(chnid_t chnid, void* buf , size_t size){
@@ -185,6 +187,7 @@ ssize_t mlib_readchn(chnid_t chnid, void* buf , size_t size){
 
     if(tbfsize - len>0)
         mytbf_returntoken(channel[chnid].tbf, tbfsize-len);
+    // sleep(1); 
 
     return len;    
     

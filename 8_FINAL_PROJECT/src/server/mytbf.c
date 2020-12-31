@@ -43,8 +43,9 @@ static void* thr_alrm(void* p){
 
         }
         pthread_mutex_unlock(&mut_job);
+        sleep(1);
     }
-    sleep(1);
+    
 
 }
 
@@ -110,6 +111,11 @@ mytbf_t* mytbf_init(int cps, int burst){
     return me;
     
 
+}
+
+static int min(int a, int b){
+    if(a > b) return b;
+    return a;
 }
 
 
